@@ -11,16 +11,11 @@ namespace OpenVPN
     internal class Program
     {
         public static string newVPNclient;
-        public static string buildkey = $"cd /etc/openvpn/easy-rsa/ && source ./vars && ./build-key --batch ";
-        public static string mkdir = $"mkdir /tmp/";
-        public static string cpCrt = $"cp /etc/openvpn/easy-rsa/keys/{newVPNclient}.crt /tmp/{newVPNclient}";
-        public static string cpKey = $"cp /etc/openvpn/easy-rsa/keys/{newVPNclient}.key /tmp/{newVPNclient}";
-        public static string cpCaCrt = $"cp /etc/openvpn/easy-rsa/keys/ca.crt /tmp/{newVPNclient}";
 
         static void Main(string[] args)
         {
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Создать ноый сертификат и ключ, нажмите - 1.");
+            Console.WriteLine("Создать новый сертификат и ключ, нажмите - 1.");
 
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Отозвать существующий сертификат нажмите - 2.");
@@ -28,7 +23,6 @@ namespace OpenVPN
             Console.ForegroundColor = ConsoleColor.White;
 
             int choice = int.Parse(Console.ReadLine());
-
             
             switch(choice)
             { 
@@ -45,6 +39,8 @@ namespace OpenVPN
             Console.WriteLine("Введите название сертификата (пользователя) латинскими буквами:");
 
             newVPNclient = Console.ReadLine();
+
+            string buildkey = $"cd /etc/openvpn/easy-rsa/ && source ./vars && ./build-key --batch ";
 
             Process process = new Process();
             process.StartInfo.FileName = "/bin/bash";
@@ -64,6 +60,7 @@ namespace OpenVPN
 
         public static void mkDir()
         {
+            string mkdir = $"mkdir /tmp/";
 
             Process process = new Process();
             process.StartInfo.FileName = "/bin/bash";
@@ -83,9 +80,11 @@ namespace OpenVPN
         }
         public static void copyCrt()
         {
+            string cpCrt = $"cp /etc/openvpn/easy-rsa/keys/{newVPNclient}.crt /tmp/{newVPNclient}";
+
             Process process = new Process();
             process.StartInfo.FileName = "/bin/bash"; 
-            process.StartInfo.Arguments = $"-c \"{mkdir}{newVPNclient}\"";
+            process.StartInfo.Arguments = $"-c \"{cpCrt}\"";
             process.StartInfo.RedirectStandardOutput = true; 
             process.StartInfo.RedirectStandardError = true; 
             process.StartInfo.UseShellExecute = false; 
@@ -97,6 +96,46 @@ namespace OpenVPN
             process.WaitForExit();
             process.Close();
 
+            copyKey();
+
+        }
+        public static void copyKey()
+        {
+            string cpKey = $"cp /etc/openvpn/easy-rsa/keys/{newVPNclient}.key /tmp/{newVPNclient}";
+
+            Process process = new Process();
+            process.StartInfo.FileName = "/bin/bash";
+            process.StartInfo.Arguments = $"-c \"{cpKey}\"";
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.RedirectStandardError = true;
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.CreateNoWindow = true;
+
+            process.Start();
+            string output = process.StandardOutput.ReadToEnd();
+
+            process.WaitForExit();
+            process.Close();
+
+            copyCaCrt();
+        }
+        public static void copyCaCrt()
+        {
+            string cpCaCrt = $"cp /etc/openvpn/easy-rsa/keys/ca.crt /tmp/{newVPNclient}";
+
+            Process process = new Process();
+            process.StartInfo.FileName = "/bin/bash";
+            process.StartInfo.Arguments = $"-c \"{cpCaCrt}\"";
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.RedirectStandardError = true;
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.CreateNoWindow = true;
+
+            process.Start();
+            string output = process.StandardOutput.ReadToEnd();
+
+            process.WaitForExit();
+            process.Close();
 
         }
         static void revokeCert()
