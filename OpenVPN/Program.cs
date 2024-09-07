@@ -4,6 +4,7 @@ using System;
 using System.ComponentModel.Design.Serialization;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Security.Cryptography;
 
 namespace OpenVPN
@@ -11,34 +12,35 @@ namespace OpenVPN
     internal class Program
     {
         public static string newVPNclient;
+        public static string forConfig;
 
         static void Main(string[] args)
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Создать новый сертификат и ключ, нажмите - 1.");
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("1 - Создать новый сертификат и ключ.");
 
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Отозвать существующий сертификат нажмите - 2.");
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("2 - Отозвать существующий сертификат.");
 
             Console.ForegroundColor = ConsoleColor.White;
 
-            int choice = int.Parse(Console.ReadLine());
+            int choice = int.Parse(Console.ReadLine());         
             
             switch(choice)
-            { 
+            {              
                 case 1: createCrt();
                 break;
 
                 case 2: revokeCert();
                 break;            
-            }
-           
+            }        
         }
         public static void createCrt()
         {
             Console.WriteLine("Введите название сертификата (пользователя) латинскими буквами:");
 
             newVPNclient = Console.ReadLine();
+            forConfig = newVPNclient;
 
             string buildkey = $"cd /etc/openvpn/easy-rsa/ && source ./vars && ./build-key --batch ";
 
@@ -48,13 +50,12 @@ namespace OpenVPN
             process.StartInfo.RedirectStandardOutput = true; 
             process.StartInfo.RedirectStandardError = true; 
             process.StartInfo.UseShellExecute = false; 
-            process.StartInfo.CreateNoWindow = true; 
-           
+            process.StartInfo.CreateNoWindow = true;
+
             process.Start();
-            string output = process.StandardOutput.ReadToEnd();
-            process.WaitForExit();
-        
+            process.WaitForExit();     
             process.Close();
+            
             mkDir();
         }
 
@@ -70,74 +71,59 @@ namespace OpenVPN
             process.StartInfo.UseShellExecute = false; 
             process.StartInfo.CreateNoWindow = true; 
 
-            process.Start();
-            string output = process.StandardOutput.ReadToEnd();
-
+            process.Start();;
             process.WaitForExit();
             process.Close();
 
-            copyCrt();
+            createConfig();
         }
-        public static void copyCrt()
+      
+        public static void createConfig()
         {
-            string cpCrt = $"cp /etc/openvpn/easy-rsa/keys/{newVPNclient}.crt /tmp/{newVPNclient}";
 
-            Process process = new Process();
-            process.StartInfo.FileName = "/bin/bash"; 
-            process.StartInfo.Arguments = $"-c \"{cpCrt}\"";
-            process.StartInfo.RedirectStandardOutput = true; 
-            process.StartInfo.RedirectStandardError = true; 
-            process.StartInfo.UseShellExecute = false; 
-            process.StartInfo.CreateNoWindow = true; 
+            using (StreamWriter writer = new StreamWriter(@$"/tmp/{forConfig}/Connect.ovpn"))
+            {
+                writer.WriteLine("client\r\n" +
+                    "dev tun\r\n" +
+                    "proto udp\r\n" +
+                    "auth-nocache\r\n" +
+                    "remote vpn2.cehavekorm.com.ua 18194\r\n" +
+                    "ca ca.crt\r\n" +
+                    "cert " + forConfig + ".crt\r\n" +
+                    "key " + forConfig + ".key \r\n" +
+                    "resolv-retry infinite\r\n" +
+                    "nobind\r\n" +
+                    "persist-key\r\n" +
+                    "persist-tun\r\n" +
+                    "#ns-cert-type server\r\n" +
+                    "remote-cert-tls server\r\n" +
+                    "comp-lzo\r\n" +
+                    "log openvpn.log\r\n" +
+                    "verb 3");
+            }
 
-            process.Start();
-            string output = process.StandardOutput.ReadToEnd();
-
-            process.WaitForExit();
-            process.Close();
-
-            copyKey();
-
+            copyAllFiles();
         }
-        public static void copyKey()
+        public static void copyAllFiles()
         {
-            string cpKey = $"cp /etc/openvpn/easy-rsa/keys/{newVPNclient}.key /tmp/{newVPNclient}";
+            string cpAllFiles = $"cp /etc/openvpn/easy-rsa/keys/{newVPNclient}.crt /tmp/{newVPNclient} " +
+                $"&& cp /etc/openvpn/easy-rsa/keys/{newVPNclient}.key /tmp/{newVPNclient} " +
+                $"&& cp /etc/openvpn/easy-rsa/keys/ca.crt /tmp/{newVPNclient} " +
+                $"&& cd /tmp/{newVPNclient} && tar -cvf ../$(basename \"$PWD\").tar * && cd .. && rm -fr /tmp/{newVPNclient}";
 
             Process process = new Process();
             process.StartInfo.FileName = "/bin/bash";
-            process.StartInfo.Arguments = $"-c \"{cpKey}\"";
+            process.StartInfo.Arguments = $"-c \"{cpAllFiles}\"";
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.CreateNoWindow = true;
 
             process.Start();
-            string output = process.StandardOutput.ReadToEnd();
-
             process.WaitForExit();
             process.Close();
-
-            copyCaCrt();
         }
-        public static void copyCaCrt()
-        {
-            string cpCaCrt = $"cp /etc/openvpn/easy-rsa/keys/ca.crt /tmp/{newVPNclient}";
 
-            Process process = new Process();
-            process.StartInfo.FileName = "/bin/bash";
-            process.StartInfo.Arguments = $"-c \"{cpCaCrt}\"";
-            process.StartInfo.RedirectStandardOutput = true;
-            process.StartInfo.RedirectStandardError = true;
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.CreateNoWindow = true;
-
-            process.Start();
-            string output = process.StandardOutput.ReadToEnd();
-
-            process.WaitForExit();
-            process.Close();
-
-        }
         static void revokeCert()
         {
 
