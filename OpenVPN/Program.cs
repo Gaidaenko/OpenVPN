@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Security.Cryptography;
+using System.Xml.Linq;
 
 namespace OpenVPN
 {
@@ -16,6 +17,7 @@ namespace OpenVPN
 
         static void Main(string[] args)
         {
+
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("1 - Создать новый сертификат и ключ.");
 
@@ -41,6 +43,7 @@ namespace OpenVPN
 
             newVPNclient = Console.ReadLine();
             forConfig = newVPNclient;
+           
 
             string buildkey = $"cd /etc/openvpn/easy-rsa/ && source ./vars && ./build-key --batch ";
 
@@ -104,6 +107,7 @@ namespace OpenVPN
 
             copyAllFiles();
         }
+
         public static void copyAllFiles()
         {
             string cpAllFiles = $"cp /etc/openvpn/easy-rsa/keys/{newVPNclient}.crt /tmp/{newVPNclient} " +
@@ -122,6 +126,47 @@ namespace OpenVPN
             process.Start();
             process.WaitForExit();
             process.Close();
+
+            sendMail();
+        }
+        public static void sendMail()
+        {
+            Console.WriteLine("Введите адрес почты на который отправить сертификат и ключ:");
+            string mail = Console.ReadLine();
+
+            bool validationMail = mail.Contains('@');
+            bool validationMail2 = mail.Contains('.');
+
+            if (validationMail == true && validationMail2 == true)
+            {
+                Console.WriteLine("..подождите, архив отправляется на почту!");
+
+                string send = $"mpack -s 'Created OpenVPN certificates {forConfig}' -a /tmp/{forConfig}.tar " + mail;
+
+                Process process = new Process();
+                process.StartInfo.FileName = "/bin/bash";
+                process.StartInfo.Arguments = $"-c \"{send}\"";
+                process.StartInfo.RedirectStandardOutput = true;
+                process.StartInfo.RedirectStandardError = true;
+                process.StartInfo.UseShellExecute = false;
+                process.StartInfo.CreateNoWindow = true;
+
+                process.Start(); ;
+                process.WaitForExit();
+                process.Close();
+
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine($"Отправлено!\nАрхив {forConfig}.tar временно сохранен /temp/{forConfig}.tar");
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.WriteLine($"Введенный текст не является адресом!");
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine($"Архив {forConfig}.tar временно сохранен /temp/{forConfig}.tar");             
+                Console.ForegroundColor = ConsoleColor.White;
+            }          
         }
 
         static void revokeCert()
@@ -130,5 +175,16 @@ namespace OpenVPN
             Console.WriteLine("Сертификат отозван!");
         
         }
+
+       
+    }
+    public static class OpenvpnManagement
+    {
+        public static void certNameCheck()
+        { 
+        
+        }
+
+
     }
 }
