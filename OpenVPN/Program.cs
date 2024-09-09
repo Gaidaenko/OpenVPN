@@ -10,14 +10,20 @@ using System.Xml.Linq;
 
 namespace OpenVPN
 {
-    internal class Program
+    public class Program
     {
         public static string newVPNclient;
         public static string forConfig;
 
         static void Main(string[] args)
         {
+            
+            startMenu();
+          
+        }
 
+        public static void startMenu()
+        {
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("1 - Создать новый сертификат и ключ.");
 
@@ -26,25 +32,34 @@ namespace OpenVPN
 
             Console.ForegroundColor = ConsoleColor.White;
 
-            int choice = int.Parse(Console.ReadLine());         
-            
-            switch(choice)
-            {              
-                case 1: createCrt();
-                break;
+            int choice = int.Parse(Console.ReadLine());
 
-                case 2: revokeCert();
-                break;            
-            }        
+            switch (choice)
+            {
+                case 1:
+                    enterName();
+                    break;
+
+                case 2:
+                    revokeCert();
+                    break;
+            }
+
         }
-        public static void createCrt()
+
+        public static void enterName()
         {
             Console.WriteLine("Введите название сертификата (пользователя) латинскими буквами:");
 
             newVPNclient = Console.ReadLine();
+            
             forConfig = newVPNclient;
-           
 
+            OpenVPNmgmt.checkName();
+        }
+        public static void createCrt()
+        {
+           
             string buildkey = $"cd /etc/openvpn/easy-rsa/ && source ./vars && ./build-key --batch ";
 
             Process process = new Process();
