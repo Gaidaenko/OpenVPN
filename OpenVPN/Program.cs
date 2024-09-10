@@ -14,6 +14,7 @@ namespace OpenVPN
     {
         public static string newVPNclient;
         public static string forConfig;
+        public static int choice;
 
         static void Main(string[] args)
         {
@@ -32,7 +33,28 @@ namespace OpenVPN
 
             Console.ForegroundColor = ConsoleColor.White;
 
-            int choice = int.Parse(Console.ReadLine());
+            try
+            {
+                int choice = int.Parse(Console.ReadLine());
+                
+                if (choice < 1 || choice > 2)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Введите число от 1 до 2!\n");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    startMenu();
+                  
+                }
+            }
+            catch (Exception ex)
+            {
+                
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Введите число от 1 до 2!\n");
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                startMenu();
+            }
+
 
             switch (choice)
             {
@@ -44,7 +66,6 @@ namespace OpenVPN
                     revokeCert();
                     break;
             }
-
         }
 
         public static void enterName()
