@@ -32,11 +32,11 @@ namespace OpenVPN
             {
                 
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Сертификат с таикм именем уже существует!\n\n");
+                Console.WriteLine("Сертификат с таикм именем уже существует!\n");
                 Console.ForegroundColor = ConsoleColor.White;
 
                 Program.startMenu();
-             
+                       
             }
             else 
             {

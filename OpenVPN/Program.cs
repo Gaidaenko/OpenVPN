@@ -25,46 +25,44 @@ namespace OpenVPN
 
         public static void startMenu()
         {
+            newVPNclient = null;
+            forConfig = null;
+
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("1 - Создать новый сертификат и ключ.");
+            Console.WriteLine("\n1 - Создать новый сертификат и ключ.");
 
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("2 - Отозвать существующий сертификат.");
 
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("3 - Выход");
+
             Console.ForegroundColor = ConsoleColor.White;
 
-            try
-            {
-                int choice = int.Parse(Console.ReadLine());
+            int choice = int.Parse(Console.ReadLine());
                 
-                if (choice < 1 || choice > 2)
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Введите число от 1 до 2!\n");
-                    Console.ForegroundColor = ConsoleColor.White;
-                    startMenu();
-                  
-                }
-            }
-            catch (Exception ex)
+            if (choice < 1 || choice > 3)
             {
-                
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Введите число от 1 до 2!\n");
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                startMenu();
+               Console.ForegroundColor = ConsoleColor.Red;
+               Console.WriteLine("Введите число от 1 до 2!\n");
+               Console.ForegroundColor = ConsoleColor.White;
+               startMenu();                
             }
-
 
             switch (choice)
             {
-                case 1:
-                    enterName();
-                    break;
+               case 1:
+               enterName();
+               break;
 
-                case 2:
-                    revokeCert();
-                    break;
+               case 2:
+               revokeCert();
+               break;
+
+               case 3:
+               exitMenu();
+               break;
+                    
             }
         }
 
@@ -73,14 +71,24 @@ namespace OpenVPN
             Console.WriteLine("Введите название сертификата (пользователя) латинскими буквами:");
 
             newVPNclient = Console.ReadLine();
-            
-            forConfig = newVPNclient;
 
-            OpenVPNmgmt.checkName();
+            if (string.IsNullOrEmpty(newVPNclient))
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Введите имя сертификата!");
+                Console.ForegroundColor = ConsoleColor.White;
+
+                startMenu();
+            }
+            else
+            {
+                forConfig = newVPNclient;
+
+                OpenVPNmgmt.checkName();
+            }
         }
         public static void createCrt()
-        {
-           
+        {          
             string buildkey = $"cd /etc/openvpn/easy-rsa/ && source ./vars && ./build-key --batch ";
 
             Process process = new Process();
@@ -100,11 +108,11 @@ namespace OpenVPN
 
         public static void mkDir()
         {
-            string mkdir = $"mkdir /tmp/";
+            string mkdir = $"mkdir /tmp/{newVPNclient}";
 
             Process process = new Process();
             process.StartInfo.FileName = "/bin/bash";
-            process.StartInfo.Arguments = $"-c \"{mkdir}{newVPNclient}\"";
+            process.StartInfo.Arguments = $"-c \"{mkdir}\"";
             process.StartInfo.RedirectStandardOutput = true; 
             process.StartInfo.RedirectStandardError = true; 
             process.StartInfo.UseShellExecute = false; 
@@ -173,7 +181,7 @@ namespace OpenVPN
             bool validationMail = mail.Contains('@');
             bool validationMail2 = mail.Contains('.');
 
-            if (validationMail == true && validationMail2 == true)
+            if (validationMail == true && validationMail2 == true && !String.IsNullOrEmpty(mail))
             {
                 Console.WriteLine("..подождите, архив отправляется на почту!");
 
@@ -187,21 +195,24 @@ namespace OpenVPN
                 process.StartInfo.UseShellExecute = false;
                 process.StartInfo.CreateNoWindow = true;
 
-                process.Start(); ;
+                process.Start();
                 process.WaitForExit();
                 process.Close();
 
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.WriteLine($"Отправлено!\nАрхив {forConfig}.tar временно сохранен /temp/{forConfig}.tar");
                 Console.ForegroundColor = ConsoleColor.White;
+                return;
             }
             else
             {
+                mail = null;
                 Console.ForegroundColor = ConsoleColor.DarkRed;
-                Console.WriteLine($"Введенный текст не является адресом!");
+                Console.WriteLine($"Не является адресом!");
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.WriteLine($"Архив {forConfig}.tar временно сохранен /temp/{forConfig}.tar");             
                 Console.ForegroundColor = ConsoleColor.White;
+                return;
             }          
         }
 
@@ -211,16 +222,22 @@ namespace OpenVPN
             Console.WriteLine("Сертификат отозван!");
         
         }
+        static void exitMenu()
+        {
 
-       
-    }
-    public static class OpenvpnManagement
-    {
-        public static void certNameCheck()
-        { 
-        
-        }
+            Process process = new Process();
+            process.StartInfo.FileName = "/bin/bash";
+            process.StartInfo.Arguments = $"-c \"{"exit"}\"";
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.RedirectStandardError = true;
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.CreateNoWindow = true;
 
+            process.Start(); ;
+            process.WaitForExit();
+            process.Close();
+            return; 
 
+        }      
     }
 }
