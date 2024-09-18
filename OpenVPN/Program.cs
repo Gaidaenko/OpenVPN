@@ -20,7 +20,7 @@ namespace OpenVPN
         {
             
             startMenu();
-          
+
         }
 
         public static void startMenu()
@@ -85,6 +85,7 @@ namespace OpenVPN
                 forConfig = newVPNclient;
 
                 OpenVPNmgmt.checkName();
+              
             }
         }
         public static void createCrt()
@@ -94,15 +95,15 @@ namespace OpenVPN
             Process process = new Process();
             process.StartInfo.FileName = "/bin/bash";
             process.StartInfo.Arguments = $"-c \"{buildkey} {newVPNclient}\""; 
-            process.StartInfo.RedirectStandardOutput = true; 
-            process.StartInfo.RedirectStandardError = true; 
+            process.StartInfo.RedirectStandardOutput = false; 
+            process.StartInfo.RedirectStandardError = false; 
             process.StartInfo.UseShellExecute = false; 
-            process.StartInfo.CreateNoWindow = true;
-
+            process.StartInfo.CreateNoWindow = false;
             process.Start();
-            process.WaitForExit();     
+            process.WaitForExit();
             process.Close();
-            
+
+
             mkDir();
         }
 
@@ -175,18 +176,23 @@ namespace OpenVPN
         }
         public static void sendMail()
         {
-            Console.WriteLine("Введите адрес почты на который отправить сертификат и ключ:");
+
+            Console.ForegroundColor = ConsoleColor.Cyan;
+
+            Console.WriteLine("\nВведите адрес почты на который отправить сертификат и ключ:");
+            Console.ForegroundColor = ConsoleColor.White;
             string mail = Console.ReadLine();
+           
 
             bool validationMail = mail.Contains('@');
             bool validationMail2 = mail.Contains('.');
 
             if (validationMail == true && validationMail2 == true && !String.IsNullOrEmpty(mail))
             {
-                Console.WriteLine("..подождите, архив отправляется на почту!");
+                Console.WriteLine("..подождите, архив отправляется на почту!");         
 
-                string send = $"mpack -s 'Created OpenVPN certificates {forConfig}' -a /tmp/{forConfig}.tar " + mail;
-
+                string send = $"echo '\nСкачайте OpenVPN клиент.\n\nhttps://suite.com' | mpack -s 'Created OpenVPN certificates {forConfig}' -d /dev/stdin /tmp/{forConfig}.tar " + mail;
+           
                 Process process = new Process();
                 process.StartInfo.FileName = "/bin/bash";
                 process.StartInfo.Arguments = $"-c \"{send}\"";
@@ -202,7 +208,8 @@ namespace OpenVPN
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.WriteLine($"Отправлено!\nАрхив {forConfig}.tar временно сохранен /temp/{forConfig}.tar");
                 Console.ForegroundColor = ConsoleColor.White;
-                return;
+                startMenu();
+                
             }
             else
             {
@@ -212,7 +219,8 @@ namespace OpenVPN
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.WriteLine($"Архив {forConfig}.tar временно сохранен /temp/{forConfig}.tar");             
                 Console.ForegroundColor = ConsoleColor.White;
-                return;
+                startMenu();
+               
             }          
         }
 
