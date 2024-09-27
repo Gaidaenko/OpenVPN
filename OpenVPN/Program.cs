@@ -17,10 +17,8 @@ namespace OpenVPN
         public static int choice;
 
         static void Main(string[] args)
-        {
-            
+        {         
             startMenu();
-
         }
 
         public static void startMenu()
@@ -39,30 +37,43 @@ namespace OpenVPN
 
             Console.ForegroundColor = ConsoleColor.White;
 
-            int choice = int.Parse(Console.ReadLine());
-                
-            if (choice < 1 || choice > 3)
+            try
             {
-               Console.ForegroundColor = ConsoleColor.Red;
-               Console.WriteLine("Введите число от 1 до 2!\n");
-               Console.ForegroundColor = ConsoleColor.White;
-               startMenu();                
+                int choice = int.Parse(Console.ReadLine());
+
+                if (choice < 1 || choice > 3)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Введите число от 1 до 3!\n");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    startMenu();
+                }
+                else
+                {
+                    switch (choice)
+                    {
+                        case 1:
+                            enterName();
+                            break;
+
+                        case 2:
+                            OpenVPNmgmt.revokeCrt();
+                            break;
+
+                        case 3:
+                            exitMenu();
+                            break;
+
+                    }
+                }
             }
-
-            switch (choice)
+            catch(FormatException ex)
             {
-               case 1:
-               enterName();
-               break;
-
-               case 2:
-               revokeCert();
-               break;
-
-               case 3:
-               exitMenu();
-               break;
-                    
+                Console.ForegroundColor= ConsoleColor.Red;
+                Console.WriteLine("Введите число от 1 до 3!\n");
+                Console.ForegroundColor = ConsoleColor.White;
+               
+                startMenu();
             }
         }
 
@@ -103,7 +114,6 @@ namespace OpenVPN
             process.WaitForExit();
             process.Close();
 
-
             mkDir();
         }
 
@@ -118,7 +128,6 @@ namespace OpenVPN
             process.StartInfo.RedirectStandardError = true; 
             process.StartInfo.UseShellExecute = false; 
             process.StartInfo.CreateNoWindow = true; 
-
             process.Start();;
             process.WaitForExit();
             process.Close();
@@ -143,7 +152,6 @@ namespace OpenVPN
                     "nobind\r\n" +
                     "persist-key\r\n" +
                     "persist-tun\r\n" +
-                    "#ns-cert-type server\r\n" +
                     "remote-cert-tls server\r\n" +
                     "comp-lzo\r\n" +
                     "log openvpn.log\r\n" +
@@ -167,7 +175,6 @@ namespace OpenVPN
             process.StartInfo.RedirectStandardError = true;
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.CreateNoWindow = true;
-
             process.Start();
             process.WaitForExit();
             process.Close();
@@ -181,17 +188,17 @@ namespace OpenVPN
 
             Console.WriteLine("\nВведите адрес почты на который отправить сертификат и ключ:");
             Console.ForegroundColor = ConsoleColor.White;
-            string mail = Console.ReadLine();
-           
+            string mail = Console.ReadLine();         
 
             bool validationMail = mail.Contains('@');
             bool validationMail2 = mail.Contains('.');
+            string website = "https://files.bit-cloud.eu/index.php/s/Gd2HF6LbnpwM2MN";
 
             if (validationMail == true && validationMail2 == true && !String.IsNullOrEmpty(mail))
             {
                 Console.WriteLine("..подождите, архив отправляется на почту!");         
 
-                string send = $"echo '\nСкачайте OpenVPN клиент.\n\nhttps://suite.com' | mpack -s 'Created OpenVPN certificates {forConfig}' -d /dev/stdin /tmp/{forConfig}.tar " + mail;
+                string send = $"echo '\nСкачайте OpenVPN клиент.\n\n{website}' | mpack -s 'Created OpenVPN certificates {forConfig}' -d /dev/stdin /tmp/{forConfig}.tar " + mail;
            
                 Process process = new Process();
                 process.StartInfo.FileName = "/bin/bash";
@@ -200,7 +207,6 @@ namespace OpenVPN
                 process.StartInfo.RedirectStandardError = true;
                 process.StartInfo.UseShellExecute = false;
                 process.StartInfo.CreateNoWindow = true;
-
                 process.Start();
                 process.WaitForExit();
                 process.Close();
@@ -208,8 +214,7 @@ namespace OpenVPN
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.WriteLine($"Отправлено!\nАрхив {forConfig}.tar временно сохранен /temp/{forConfig}.tar");
                 Console.ForegroundColor = ConsoleColor.White;
-                startMenu();
-                
+                startMenu();               
             }
             else
             {
@@ -219,20 +224,11 @@ namespace OpenVPN
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.WriteLine($"Архив {forConfig}.tar временно сохранен /temp/{forConfig}.tar");             
                 Console.ForegroundColor = ConsoleColor.White;
-                startMenu();
-               
+                startMenu();             
             }          
-        }
-
-        static void revokeCert()
-        {
-
-            Console.WriteLine("Сертификат отозван!");
-        
         }
         static void exitMenu()
         {
-
             Process process = new Process();
             process.StartInfo.FileName = "/bin/bash";
             process.StartInfo.Arguments = $"-c \"{"exit"}\"";
@@ -240,12 +236,10 @@ namespace OpenVPN
             process.StartInfo.RedirectStandardError = true;
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.CreateNoWindow = true;
-
             process.Start(); ;
             process.WaitForExit();
             process.Close();
             return; 
-
         }      
     }
 }
