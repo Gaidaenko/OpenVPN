@@ -17,8 +17,8 @@ namespace OpenVPN
         public static int choice;
 
         static void Main(string[] args)
-        {         
-            startMenu();
+        {
+             startMenu();
         }
 
         public static void startMenu()
@@ -179,7 +179,7 @@ namespace OpenVPN
             process.WaitForExit();
             process.Close();
 
-            sendMail();
+            OpenVPNmgmt.createLog();
         }
         public static void sendMail()
         {
@@ -198,7 +198,7 @@ namespace OpenVPN
             {
                 Console.WriteLine("..подождите, архив отправляется на почту!");         
 
-                string send = $"echo '\nСкачайте OpenVPN клиент.\n\n{website}' | mpack -s 'Created OpenVPN certificates {forConfig}' -d /dev/stdin /tmp/{forConfig}.tar " + mail;
+                string send = $"echo '\nСкачать OpenVPN клиент.\n\n{website}' | mpack -s 'Created OpenVPN certificates {forConfig}' -d /dev/stdin /tmp/{forConfig}.tar " + mail;
            
                 Process process = new Process();
                 process.StartInfo.FileName = "/bin/bash";

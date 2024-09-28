@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
+using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography;
@@ -14,6 +15,8 @@ namespace OpenVPN
 {
     public static class OpenVPNmgmt
     {
+        public static string revokeCertName;
+
         public static void checkName()
         {
          
@@ -51,11 +54,65 @@ namespace OpenVPN
             }         
         }
 
+        public static void createLog()
+        {
+            DateTime dateTime = DateTime.Now;
+
+            string log = "test -f /var/log/openvpnmgmt.log && echo 'exist' || echo 'doesNotExist'";
+            string createLog = $"touch /var/log/openvpnmgmt.log && echo 'Certificate created {Program.forConfig} {dateTime}' >> /var/log/openvpnmgmt.log";                 
+            string enrtyInLog = $"echo 'Certificate created {Program.forConfig} {dateTime}' >> /var/log/openvpnmgmt.log";
+
+            Process processLog = new Process();
+            processLog.StartInfo.FileName = "/bin/bash";
+            processLog.StartInfo.Arguments = $"-c \"{log}\"";
+            processLog.StartInfo.RedirectStandardOutput = true;
+            processLog.StartInfo.RedirectStandardError = true;
+            processLog.StartInfo.UseShellExecute = false;
+            processLog.StartInfo.CreateNoWindow = true;
+            processLog.Start();
+
+            StreamReader logReader = processLog.StandardOutput;
+            string result = logReader.ReadToEnd();
+
+            if (result.Contains("exist"))
+            {
+                Process processWriteLog = new Process();
+                processWriteLog.StartInfo.FileName = "/bin/bash";
+                processWriteLog.StartInfo.Arguments = $"-c \"{enrtyInLog}\"";
+                processWriteLog.StartInfo.RedirectStandardOutput = true;
+                processWriteLog.StartInfo.RedirectStandardError = true;
+                processWriteLog.StartInfo.UseShellExecute = false;
+                processWriteLog.StartInfo.CreateNoWindow = true;
+                processWriteLog.Start();
+                processWriteLog.WaitForExit();
+                processWriteLog.Close();
+
+            }
+            else
+            {
+                Process processCreateLog = new Process();
+                processCreateLog.StartInfo.FileName = "/bin/bash";
+                processCreateLog.StartInfo.Arguments = $"-c \"{createLog}\"";
+                processCreateLog.StartInfo.RedirectStandardOutput = true;
+                processCreateLog.StartInfo.RedirectStandardError = true;
+                processCreateLog.StartInfo.UseShellExecute = false;
+                processCreateLog.StartInfo.CreateNoWindow = true;
+                processCreateLog.Start();
+                processCreateLog.WaitForExit();
+                processCreateLog.Close();
+
+            }
+            processLog.WaitForExit();
+            processLog.Close();
+
+            Program.sendMail();
+        }
+
         public static void revokeCrt()
         {
 
             Console.WriteLine("Введите имя сертификата!");
-            string revokeCertName = Console.ReadLine();
+            revokeCertName = Console.ReadLine();
 
             string chkName = $"test -f /etc/openvpn/easy-rsa/keys/{revokeCertName}.crt && echo 'exist' || echo 'doesNotExist'";
             string revoke = $"cd /etc/openvpn/easy-rsa/ && source ./vars && ./revoke-full {revokeCertName} && kill -HUP $(pgrep openvpn)";
@@ -104,7 +161,9 @@ namespace OpenVPN
                 process.WaitForExit();
                 process.Close();
 
-                Program.startMenu();
+                revokeLog();
+
+                
 
             }
             else
@@ -119,6 +178,58 @@ namespace OpenVPN
                 Program.startMenu();
 
             }
+            
+        }
+
+        public static void revokeLog()
+        {
+            DateTime dateTime = DateTime.Now;
+            string log = "test -f /var/log/openvpnmgmt.log && echo 'exist' || echo 'doesNotExist'";
+            string createLog = $"touch /var/log/openvpnmgmt.log && echo 'Certificate revoked {revokeCertName} {dateTime}' >> /var/log/openvpnmgmt.log";
+            string enrtyInLog = $"echo 'Certificate revoked {revokeCertName} {dateTime}' >> /var/log/openvpnmgmt.log";
+
+            Process processLog = new Process();
+            processLog.StartInfo.FileName = "/bin/bash";
+            processLog.StartInfo.Arguments = $"-c \"{log}\"";
+            processLog.StartInfo.RedirectStandardOutput = true;
+            processLog.StartInfo.RedirectStandardError = true;
+            processLog.StartInfo.UseShellExecute = false;
+            processLog.StartInfo.CreateNoWindow = true;
+            processLog.Start();
+
+            StreamReader logReader = processLog.StandardOutput;
+            string result = logReader.ReadToEnd();
+
+            if (result.Contains("exist"))
+            {
+                Process processWriteLog = new Process();
+                processWriteLog.StartInfo.FileName = "/bin/bash";
+                processWriteLog.StartInfo.Arguments = $"-c \"{enrtyInLog}\"";
+                processWriteLog.StartInfo.RedirectStandardOutput = true;
+                processWriteLog.StartInfo.RedirectStandardError = true;
+                processWriteLog.StartInfo.UseShellExecute = false;
+                processWriteLog.StartInfo.CreateNoWindow = true;
+                processWriteLog.Start();
+                processWriteLog.WaitForExit();
+                processWriteLog.Close();
+
+            }
+            else
+            {
+                Process processCreateLog = new Process();
+                processCreateLog.StartInfo.FileName = "/bin/bash";
+                processCreateLog.StartInfo.Arguments = $"-c \"{createLog}\"";
+                processCreateLog.StartInfo.RedirectStandardOutput = true;
+                processCreateLog.StartInfo.RedirectStandardError = true;
+                processCreateLog.StartInfo.UseShellExecute = false;
+                processCreateLog.StartInfo.CreateNoWindow = true;
+                processCreateLog.Start();
+                processCreateLog.WaitForExit();
+                processCreateLog.Close();
+
+            }
+
+            Program.startMenu();
         }
     }
 }
