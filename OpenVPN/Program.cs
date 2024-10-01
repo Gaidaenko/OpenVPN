@@ -19,6 +19,7 @@ namespace OpenVPN
         static void Main(string[] args)
         {
              startMenu();
+
         }
 
         public static void startMenu()
@@ -28,12 +29,10 @@ namespace OpenVPN
 
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("\n1 - Создать новый сертификат и ключ.");
-
-            Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("2 - Отозвать существующий сертификат.");
-
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("3 - Выход");
+            Console.WriteLine("3 - Кто подключен в сеансе.");
+            Console.WriteLine("4 - История.");
+            Console.WriteLine("5 - Выход.");
 
             Console.ForegroundColor = ConsoleColor.White;
 
@@ -41,10 +40,10 @@ namespace OpenVPN
             {
                 int choice = int.Parse(Console.ReadLine());
 
-                if (choice < 1 || choice > 3)
+                if (choice < 1 || choice > 5)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Введите число от 1 до 3!\n");
+                    Console.WriteLine("Введите число от 1 до 5!\n");
                     Console.ForegroundColor = ConsoleColor.White;
                     startMenu();
                 }
@@ -61,6 +60,14 @@ namespace OpenVPN
                             break;
 
                         case 3:
+                            OpenVPNmgmt.watchSessions(); 
+                            break;
+
+                        case 4:
+                            OpenVPNmgmt.showActions();
+                            break;
+
+                        case 5:
                             exitMenu();
                             break;
 
@@ -70,7 +77,7 @@ namespace OpenVPN
             catch(FormatException ex)
             {
                 Console.ForegroundColor= ConsoleColor.Red;
-                Console.WriteLine("Введите число от 1 до 3!\n");
+                Console.WriteLine("Введите число от 1 до 5!\n");
                 Console.ForegroundColor = ConsoleColor.White;
                
                 startMenu();
@@ -144,7 +151,7 @@ namespace OpenVPN
                     "dev tun\r\n" +
                     "proto udp\r\n" +
                     "auth-nocache\r\n" +
-                    "remote vpn2.cehavekorm.com.ua 18194\r\n" +
+                    "remote files.bit-cloud.eu 18194\r\n" +
                     "ca ca.crt\r\n" +
                     "cert " + forConfig + ".crt\r\n" +
                     "key " + forConfig + ".key \r\n" +

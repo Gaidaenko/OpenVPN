@@ -154,7 +154,7 @@ namespace OpenVPN
                 processRm.WaitForExit();
                 processRm.Close(); 
 
-                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Сертификат отозван!\n");
                 Console.ForegroundColor = ConsoleColor.White;
 
@@ -231,5 +231,53 @@ namespace OpenVPN
 
             Program.startMenu();
         }
+
+        public static void showActions()
+        {
+            string showLog = "cat /var/log/openvpnmgmt.log";
+
+            Process processShowLog = new Process();
+            processShowLog.StartInfo.FileName = "/bin/bash";
+            processShowLog.StartInfo.Arguments = $"-c \"{showLog}\"";
+            processShowLog.StartInfo.RedirectStandardOutput = true;
+            processShowLog.StartInfo.RedirectStandardError = true;
+            processShowLog.StartInfo.UseShellExecute = false;
+            processShowLog.StartInfo.CreateNoWindow = true;
+            processShowLog.Start();
+
+            StreamReader readLog = processShowLog.StandardOutput;
+            string result = readLog.ReadToEnd();
+            Console.WriteLine(result.ToString());
+
+            processShowLog.WaitForExit();
+            processShowLog.Close();
+
+            Program.startMenu();
+        }
+
+        public static void watchSessions()
+        {
+            string session = "cat /var/log/openvpn-status.log";
+
+            Process processSessions = new Process();
+            processSessions.StartInfo.FileName = "/bin/bash";
+            processSessions.StartInfo.Arguments = $"-c \"{session}\"";
+            processSessions.StartInfo.RedirectStandardOutput = true;
+            processSessions.StartInfo.RedirectStandardError = true;
+            processSessions.StartInfo.UseShellExecute = false;
+            processSessions.StartInfo.CreateNoWindow = true;
+            processSessions.Start();
+
+            StreamReader readLog = processSessions.StandardOutput;
+            string resultLog = readLog.ReadToEnd();
+            Console.WriteLine("\n"+resultLog.ToString()+"\n");
+
+            processSessions.WaitForExit();
+            processSessions.Close();
+
+            Program.startMenu();
+
+        }
+
     }
 }
