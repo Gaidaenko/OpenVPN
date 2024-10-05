@@ -20,7 +20,7 @@ namespace OpenVPN
         public static void checkName()
         {
          
-            string chkName = $"test -f /etc/openvpn/easy-rsa/keys/{Program.forConfig}.crt && echo 'exist' || echo 'doesNotExist'";
+            string chkName = $"test -f /etc/openvpn/easy-rsa/keys/{Program.newVPNclient}.crt && echo 'exist' || echo 'doesNotExist'";
 
             Process process = new Process();
             process.StartInfo.FileName = "/bin/bash";
@@ -38,7 +38,7 @@ namespace OpenVPN
             {
                 
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Сертификат с таикм именем уже существует!\n");
+                Console.WriteLine("Сертифікат з таким ім'ям вже існеє!\n");
                 Console.ForegroundColor = ConsoleColor.White;
 
                 Program.startMenu();
@@ -59,8 +59,8 @@ namespace OpenVPN
             DateTime dateTime = DateTime.Now;
 
             string log = "test -f /var/log/openvpnmgmt.log && echo 'exist' || echo 'doesNotExist'";
-            string createLog = $"touch /var/log/openvpnmgmt.log && echo 'Certificate created {Program.forConfig} {dateTime}' >> /var/log/openvpnmgmt.log";                 
-            string enrtyInLog = $"echo 'Certificate created {Program.forConfig} {dateTime}' >> /var/log/openvpnmgmt.log";
+            string createLog = $"touch /var/log/openvpnmgmt.log && echo 'Certificate created {Program.newVPNclient} {dateTime}' >> /var/log/openvpnmgmt.log";                 
+            string enrtyInLog = $"echo 'Certificate created {Program.newVPNclient} {dateTime}' >> /var/log/openvpnmgmt.log";
 
             Process processLog = new Process();
             processLog.StartInfo.FileName = "/bin/bash";
@@ -111,7 +111,7 @@ namespace OpenVPN
         public static void revokeCrt()
         {
 
-            Console.WriteLine("Введите имя сертификата!");
+            Console.WriteLine("Введіть назву сертифікату!");
             revokeCertName = Console.ReadLine();
 
             string chkName = $"test -f /etc/openvpn/easy-rsa/keys/{revokeCertName}.crt && echo 'exist' || echo 'doesNotExist'";
@@ -155,7 +155,7 @@ namespace OpenVPN
                 processRm.Close(); 
 
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Сертификат отозван!\n");
+                Console.WriteLine("Сертифікат отозван!\n");
                 Console.ForegroundColor = ConsoleColor.White;
 
                 process.WaitForExit();
@@ -163,13 +163,11 @@ namespace OpenVPN
 
                 revokeLog();
 
-                
-
             }
             else
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Сертификат с таикм отсутствует в папке сертификатов!\n");
+                Console.WriteLine("Сертифікат з такою назвою відсутній в папці з сертифікатами!\n");
                 Console.ForegroundColor = ConsoleColor.White;
 
                 process.WaitForExit();

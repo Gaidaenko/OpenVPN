@@ -13,7 +13,6 @@ namespace OpenVPN
     public class Program
     {
         public static string newVPNclient;
-        public static string forConfig;
         public static int choice;
 
         static void Main(string[] args)
@@ -25,14 +24,13 @@ namespace OpenVPN
         public static void startMenu()
         {
             newVPNclient = null;
-            forConfig = null;
 
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("\n1 - Создать новый сертификат и ключ.");
-            Console.WriteLine("2 - Отозвать существующий сертификат.");
-            Console.WriteLine("3 - Кто подключен в сеансе.");
-            Console.WriteLine("4 - История.");
-            Console.WriteLine("5 - Выход.");
+            Console.WriteLine("\n1 - Створити новий сертифікат і ключ.");
+            Console.WriteLine("2 - Відізвати існуючий сертифікат.");
+            Console.WriteLine("3 - Сеанси openvpn.");
+            Console.WriteLine("4 - Історія.");
+            Console.WriteLine("5 - Вихід.");
 
             Console.ForegroundColor = ConsoleColor.White;
 
@@ -43,7 +41,7 @@ namespace OpenVPN
                 if (choice < 1 || choice > 5)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Введите число от 1 до 5!\n");
+                    Console.WriteLine("Введіть число від 1 до 5!\n");
                     Console.ForegroundColor = ConsoleColor.White;
                     startMenu();
                 }
@@ -77,7 +75,7 @@ namespace OpenVPN
             catch(FormatException ex)
             {
                 Console.ForegroundColor= ConsoleColor.Red;
-                Console.WriteLine("Введите число от 1 до 5!\n");
+                Console.WriteLine("Введіть число від 1 до 5!\n");
                 Console.ForegroundColor = ConsoleColor.White;
                
                 startMenu();
@@ -86,24 +84,23 @@ namespace OpenVPN
 
         public static void enterName()
         {
-            Console.WriteLine("Введите название сертификата (пользователя) латинскими буквами:");
+            Console.WriteLine("Введіть назву сертифікату (користувача) латинськими літерами:");
 
             newVPNclient = Console.ReadLine();
 
             if (string.IsNullOrEmpty(newVPNclient))
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Введите имя сертификата!");
+                Console.WriteLine("Введіть назву сертифікату!");
                 Console.ForegroundColor = ConsoleColor.White;
 
                 startMenu();
             }
             else
             {
-                forConfig = newVPNclient;
 
                 OpenVPNmgmt.checkName();
-              
+            
             }
         }
         public static void createCrt()
@@ -145,7 +142,7 @@ namespace OpenVPN
         public static void createConfig()
         {
 
-            using (StreamWriter writer = new StreamWriter(@$"/tmp/{forConfig}/Connect.ovpn"))
+            using (StreamWriter writer = new StreamWriter(@$"/tmp/{newVPNclient}/Connect.ovpn"))
             {
                 writer.WriteLine("client\r\n" +
                     "dev tun\r\n" +
@@ -153,8 +150,8 @@ namespace OpenVPN
                     "auth-nocache\r\n" +
                     "remote files.bit-cloud.eu 18194\r\n" +
                     "ca ca.crt\r\n" +
-                    "cert " + forConfig + ".crt\r\n" +
-                    "key " + forConfig + ".key \r\n" +
+                    "cert " + newVPNclient + ".crt\r\n" +
+                    "key " + newVPNclient + ".key \r\n" +
                     "resolv-retry infinite\r\n" +
                     "nobind\r\n" +
                     "persist-key\r\n" +
@@ -193,7 +190,7 @@ namespace OpenVPN
 
             Console.ForegroundColor = ConsoleColor.Cyan;
 
-            Console.WriteLine("\nВведите адрес почты на который отправить сертификат и ключ:");
+            Console.WriteLine("\nВведіть назву пошти на корту відправити сертифікат і ключ:");
             Console.ForegroundColor = ConsoleColor.White;
             string mail = Console.ReadLine();         
 
@@ -203,9 +200,9 @@ namespace OpenVPN
 
             if (validationMail == true && validationMail2 == true && !String.IsNullOrEmpty(mail))
             {
-                Console.WriteLine("..подождите, архив отправляется на почту!");         
+                Console.WriteLine("..зачекайте, архів відправляється на пошту!");         
 
-                string send = $"echo '\nСкачать OpenVPN клиент.\n\n{website}' | mpack -s 'Created OpenVPN certificates {forConfig}' -d /dev/stdin /tmp/{forConfig}.tar " + mail;
+                string send = $"echo '\nЗавантажити OpenVPN клієнт.\n\n{website}' | mpack -s 'Created OpenVPN certificates {newVPNclient}' -d /dev/stdin /tmp/{newVPNclient}.tar " + mail;
            
                 Process process = new Process();
                 process.StartInfo.FileName = "/bin/bash";
@@ -219,7 +216,7 @@ namespace OpenVPN
                 process.Close();
 
                 Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine($"Отправлено!\nАрхив {forConfig}.tar временно сохранен /temp/{forConfig}.tar");
+                Console.WriteLine($"Відправлено!\nАрхів {newVPNclient}.tar тимчасово збережено /temp/{newVPNclient}.tar");
                 Console.ForegroundColor = ConsoleColor.White;
                 startMenu();               
             }
@@ -227,9 +224,9 @@ namespace OpenVPN
             {
                 mail = null;
                 Console.ForegroundColor = ConsoleColor.DarkRed;
-                Console.WriteLine($"Не является адресом!");
+                Console.WriteLine($"Не є адресою!");
                 Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine($"Архив {forConfig}.tar временно сохранен /temp/{forConfig}.tar");             
+                Console.WriteLine($"\nАрхів {newVPNclient}.tar тимчасово збережено /tmp/{newVPNclient}.tar");             
                 Console.ForegroundColor = ConsoleColor.White;
                 startMenu();             
             }          
